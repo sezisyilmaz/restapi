@@ -43,3 +43,4 @@
         }
     ```
  - DELETE `{{baseUrl}}/customer/id`
+ - 
