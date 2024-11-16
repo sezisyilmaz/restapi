@@ -30,12 +30,12 @@ if (str_starts_with($requestUri, '/')) {
 
 $parts = explode("/", $_SERVER["REQUEST_URI"]);
 
-if ($parts[2] != "customer") {
+if ($parts[1] != "customer") {
     http_response_code(404);
     Response::error('Not Found', HttpStatus::NOT_FOUND);
 }
 
-$customer_id = !empty($parts[3]) ? (int) $parts[3] : null;
+$customer_id = !empty($parts[2]) ? (int) $parts[2] : null;
 
 $customerController = new CustomerRestApiController($config);
 
