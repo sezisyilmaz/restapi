@@ -22,7 +22,7 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
 
 
-if (str_starts_with($requestUri, '/rest')) {
+if (str_starts_with($requestUri, '/')) {
     if (!Auth::checkAuthenticateApiKey($config)) {
         Response::error('Unauthorized access', HttpStatus::UNAUTHORIZED);
     }
