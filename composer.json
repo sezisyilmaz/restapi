@@ -1,0 +1,19 @@
+{
+  "name": "sezis/customer-api",
+  "description": "A REST API for managing customer data",
+  "type": "project",
+  "require": {
+    "php": "^8.0",
+    "giggsey/libphonenumber-for-php": "^8.13",
+    "vlucas/phpdotenv": "^5.5",
+    "monolog/monolog": "^3.0",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/",
+      "Config\\": "config/"
+    }
+  },
+  "minimum-stability": "stable"
+}
