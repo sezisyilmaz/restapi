@@ -7,10 +7,13 @@ use App\Core\HttpStatus;
 use App\Models\CustomerRestApiModel;
 use App\Core\Response;
 use App\Helpers\RequestValidation;
+use libphonenumber\NumberParseException;
 
 class CustomerRestApiController
 {
     private CustomerRestApiModel $customerModel;
+
+    private $actionName = null;
 
     public function __construct(array $config) {
         $this->customerModel = new CustomerRestApiModel($config);
@@ -46,6 +49,7 @@ class CustomerRestApiController
 
         $customer = $this->customerModel->getCustomerById($customerId);
 
+        // Exist customer
         if (!$customer) {
             Response::error(
                 'Customer not found',
@@ -59,13 +63,15 @@ class CustomerRestApiController
 
         if ($requestMethod === 'GET') {
             Response::success('Customer found by id', HttpStatus::OK, $customer);
-        } elseif ($requestMethod === 'DELETE') {
+        }
+
+        if ($requestMethod === 'DELETE') {
             $this->customerModel->deleteCustomer($customerId);
             Response::success(
-                'Customer delete by id',
+                'Customer delete by customer id',
                 HttpStatus::OK,
                 [
-                    'delete_id' => $customerId
+                    'delete_customer_id' => $customerId
                 ]
             );
         }
@@ -84,11 +90,17 @@ class CustomerRestApiController
         }
 
         if ($requestMethod === 'GET') {
+            $actionData = $this->getActionData();
+            if($actionData) {
+                $this->searchCustomerByNameOrEmail($actionData);
+            }
+
             $data = $this->customerModel->getAllCustomers();
             Response::success('All customers data', HttpStatus::OK, $data);
+        }
 
-        } elseif ($requestMethod === 'POST') {
-            $data = $this->getDataByPhpInput();
+        if ($requestMethod === 'POST') {
+            $data = $this->postActionData();
             $this->validationCustomerData($data);
             $customer = $this->customerModel->getCustomerById($data['customer_id']);
 
@@ -105,9 +117,10 @@ class CustomerRestApiController
 
             $this->customerModel->createCustomer($data);
             Response::success('Customer created', HttpStatus::OK, $data);
+        }
 
-        } elseif ($requestMethod === 'PUT' || $requestMethod === 'PATCH') {
-            $data = $this->getDataByPhpInput();
+        if ($requestMethod === 'PUT' || $requestMethod === 'PATCH') {
+            $data = $this->postActionData();
             $this->validationCustomerData($data);
             $customer = $this->customerModel->getCustomerById($data['customer_id']);
 
@@ -125,16 +138,80 @@ class CustomerRestApiController
             $this->customerModel->updateCustomer($data);
             Response::success('Customer update was successful', HttpStatus::OK, $data);
         }
+    }
 
+    /**
+     * @param array $actionData
+     * @return void
+     */
+    private function searchCustomerByNameOrEmail(array $actionData): void {
+        if ($actionData) {
+            if (array_key_exists('name', $actionData)) {
+                $data = $this->customerModel->filterName($actionData['name']);
+                if ($data) {
+                    Response::success('Search name', HttpStatus::OK, $data);
+                }
+
+                Response::success(
+                    'Search name',
+                    HttpStatus::OK,
+                    [
+                        'info' => 'Searched name not found',
+                        'name' => $actionData['name']
+                    ]
+                );
+
+            }
+
+            if (array_key_exists('email', $actionData)) {
+                $data = $this->customerModel->filterEmail($actionData['email']);
+                if ($data) {
+                    Response::success('Search email', HttpStatus::OK, $data);
+                }
+
+                Response::success(
+                    'Search email',
+                    HttpStatus::OK,
+                    [
+                        'info' => 'Searched email not found',
+                        'email' => $actionData['email']
+                    ]
+                );
+
+            }
+        }
     }
 
     /**
      * Get data by php input
      * @return array
      */
-    private function getDataByPhpInput(): array
-    {
-        return (array) json_decode(file_get_contents("php://input"), true);
+    private function postActionData(): array {
+        $data = (array) json_decode(file_get_contents("php://input"), true);
+        $allowedKeys = ['customer_id', 'name', 'email', 'phone'];
+        $filteredData = array_intersect_key($data, array_flip($allowedKeys));
+
+        return $this->clearDataInputs($data, $allowedKeys);
+    }
+
+    private function getActionData(): ?array {
+        var_dump($_GET);
+        if (!empty($_GET['name'])) {
+            return $this->clearDataInputs($_GET);
+        }
+
+        if (!empty($_GET['email'])) {
+            return $this->clearDataInputs($_GET);
+        }
+
+        return null;
+    }
+
+    private function clearDataInputs (array $filteredData): array {
+
+        return array_map(function ($value) {
+            return is_string($value) ? htmlspecialchars($value, ENT_QUOTES, 'UTF-8') : $value;
+        }, $filteredData);
     }
 
     /**
@@ -142,12 +219,10 @@ class CustomerRestApiController
      * @param array $data
      * @return void
      */
-    private function validationCustomerData(array $data): void
-    {
-        RequestValidation::validateDataCount($data);
-        RequestValidation::validateCustomerId($data['customer_id'] ?? 0);
-        RequestValidation::validateName($data['name'] ?? '');
-        RequestValidation::validateEmail($data['email'] ?? '');
-        RequestValidation::validatePhone($data['phone'] ?? '');
+    private function validationCustomerData(array $data): void {
+        RequestValidation::validateCustomerId($data['customer_id']);
+        RequestValidation::validateName($data['name']);
+        RequestValidation::validateEmail($data['email']);
+        RequestValidation::validatePhone($data['phone']);
     }
 }

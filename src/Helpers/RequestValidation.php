@@ -5,10 +5,10 @@ namespace App\Helpers;
 
 use App\Core\HttpStatus;
 use App\Core\Response;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberUtil;
 
 class RequestValidation {
-
-    public const DATA_COUNT = 4;
 
     /**
      * Validate customer id
@@ -26,7 +26,9 @@ class RequestValidation {
                     'customer_id' => $customerID,
                 ]
             );
-        } elseif (!is_int($customerID)) {
+        }
+
+        if (!is_int($customerID)) {
             Response::error(
                 'Customer update not possible',
                 HttpStatus::UNPROCESSABLE_CONTENT,
@@ -54,7 +56,9 @@ class RequestValidation {
                     'name' => $name,
                 ]
             );
-        } elseif (!preg_match("/^[a-zA-ZäöüÄÖÜß\s'-]+$/u", $name)) {
+        }
+
+        if (!preg_match("/^[a-zA-ZäöüÄÖÜß\s'-]+$/u", $name)) {
             Response::error(
                 'Customer update not possible',
                 HttpStatus::UNPROCESSABLE_CONTENT,
@@ -81,7 +85,11 @@ class RequestValidation {
                     'email' => $email,
                 ]
             );
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) &&
+            !checkdnsrr(substr(strrchr($email, "@"), 1), "MX")
+        ) {
             Response::error(
                 'Customer update not possible',
                 HttpStatus::UNPROCESSABLE_CONTENT,
@@ -108,36 +116,20 @@ class RequestValidation {
                     'phone' => $phone,
                 ]
             );
-        } elseif (!preg_match("/^\+\d{1,3}\s\d{1,3}\s\d{4,}$/", $phone)) {
+        }
 
+        $phoneNumberUtil = PhoneNumberUtil::getInstance();
+        $phoneNumber = $phoneNumberUtil->parse($phone, 'DE');
+
+        if ($phoneNumber === null || !$phoneNumberUtil->isValidNumber($phoneNumber)) {
             Response::error(
                 'Customer update not possible',
                 HttpStatus::UNPROCESSABLE_CONTENT,
                 [
-                    'error' => 'Invalid phone number format. Example: +49 123 4567890',
+                    'error' => 'Invalid phone number format',
                     'phone' => $phone,
                 ]
             );
         }
     }
-
-    /**
-     * Validate data count
-     * @param array $data
-     * @return void
-     */
-    public static function validateDataCount(array $data): void {
-
-        if (count($data) <> self::DATA_COUNT) {
-            Response::error(
-                'Customer update not possible',
-                HttpStatus::UNPROCESSABLE_CONTENT,
-                [
-                    'error' => 'Invalid json data',
-                    'data' => $data,
-                ]
-            );
-        }
-    }
-
 }

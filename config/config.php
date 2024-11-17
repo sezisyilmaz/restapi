@@ -3,9 +3,9 @@
 return [
     // Data base
     'db' => [
-        'host' => 'localhost',
-        'name' => 'yilmaz',
-        'user' => 'root',
+        'host' => '',
+        'name' => '',
+        'user' => '',
         'password' => '',
         'charset' => 'utf8mb4',
     ],

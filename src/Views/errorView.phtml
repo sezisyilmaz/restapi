@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Logs</title>
+    <style>
+        body {
+            background-color: black;
+            color: green;
+            font-family: monospace;
+            padding: 20px;
+            margin: 0;
+        }
+        .error-container {
+            font-size: 14px;
+        }
+        strong {
+            color: aliceblue;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>Fehlerprotokolle:</h1>
+    <?php foreach ($errors as $error): ?>
+        <div class="error-entry">
+            <p><strong>Date:</strong>  <?php echo htmlspecialchars($error['timestamp'] ?? ''); ?></p>
+            <p><strong>Nachricht:</strong> <?php echo htmlspecialchars($error['errorMessage'] ?? ''); ?></p>
+            <strong>Details:</strong>
+            <pre><?php echo json_encode($error['details'] ?? [], JSON_PRETTY_PRINT); ?></pre>
+        </div>
+  <hr>
+    <?php endforeach; ?>
+</div>
+</body>
+</html>

@@ -58,7 +58,7 @@ class CustomerRestApiModel {
      * @param array $data
      * @return int
      */
-    public function updateCustomer(array $data): int  {
+    public function updateCustomer(array $data): int {
         $stmt = $this->db->prepare('UPDATE ' . $this->table . ' SET name = :name, email = :email, phone = :phone, updated_at = NOW() 
                                     WHERE customer_id = :customer_id');
         $stmt->bindParam(':customer_id', $data['customer_id'], \PDO::PARAM_INT);
@@ -78,5 +78,23 @@ class CustomerRestApiModel {
         $stmt = $this->db->prepare('DELETE FROM ' . $this->table . ' WHERE customer_id = :customer_id');
         $stmt->bindParam(':customer_id', $customerId, \PDO::PARAM_INT);
         $stmt->execute();
+    }
+
+    public function filterName(string $name): bool | array {
+        $name = "%$name%";
+        $stmt = $this->db->prepare('SELECT customer_id, name, email, phone FROM customers WHERE name LIKE :name');
+        $stmt->bindParam(':name', $name, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function filterEmail(string $email): bool | array {
+        $email = "%$email%";
+        $stmt = $this->db->prepare('SELECT customer_id, name, email, phone FROM customers WHERE email LIKE :email');
+        $stmt->bindParam(':email', $email, \PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 }
