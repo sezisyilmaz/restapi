@@ -13,8 +13,6 @@ class CustomerRestApiController
 {
     private CustomerRestApiModel $customerModel;
 
-    private $actionName = null;
-
     public function __construct(array $config) {
         $this->customerModel = new CustomerRestApiModel($config);
     }
@@ -141,6 +139,7 @@ class CustomerRestApiController
     }
 
     /**
+     * Search customer by name or email
      * @param array $actionData
      * @return void
      */
@@ -194,6 +193,10 @@ class CustomerRestApiController
         return $this->clearDataInputs($data, $allowedKeys);
     }
 
+    /**
+     * Get action Data
+     * @return array|null
+     */
     private function getActionData(): ?array {
         var_dump($_GET);
         if (!empty($_GET['name'])) {

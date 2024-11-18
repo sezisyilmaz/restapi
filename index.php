@@ -4,7 +4,7 @@ declare(strict_types=1);
 // Autoload von Composer
 require_once __DIR__ . '/vendor/autoload.php';
 $config = require 'config/config.php';
-;
+
 use App\Controllers\CustomerRestApiController;
 use App\Core\Auth;
 use App\Core\Response;
@@ -22,9 +22,7 @@ if ($config['debug']) {
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
 
-
 $parts = explode("/", $_SERVER["REQUEST_URI"]);
-
 
 if($parts[1] === 'logs') {
     $controller = new ErrorController();
