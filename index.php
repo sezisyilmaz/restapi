@@ -38,7 +38,7 @@ if (str_starts_with($requestUri, '/')) {
 
 if ($parts[1] != "customer") {
     http_response_code(404);
-    Response::error('Not Found', HttpStatus::NOT_FOUND);
+    Response::error('Not Found {{base_url}}/customer', HttpStatus::NOT_FOUND);
 }
 
 $customer_id = !empty($parts[2]) ? (int) $parts[2] : null;
