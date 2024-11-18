@@ -26,7 +26,7 @@ $requestUri = $_SERVER['REQUEST_URI'];
 $parts = explode("/", $_SERVER["REQUEST_URI"]);
 
 
-if($parts[2] === 'logs') {
+if($parts[1] === 'logs') {
     $controller = new ErrorController();
     $controller->showErrors();
     exit();
