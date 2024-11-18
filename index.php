@@ -6,7 +6,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 $config = require 'config/config.php';
 ;
 use App\Controllers\CustomerRestApiController;
-use App\core\Auth;
+use App\Core\Auth;
 use App\Core\Response;
 use App\Core\HttpStatus;
 use App\Controllers\ErrorController;
